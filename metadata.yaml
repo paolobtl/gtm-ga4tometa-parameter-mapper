@@ -1,0 +1,5 @@
+homepage: "https://www.paolobietolini.com"
+documentation: "https://paolobietolini.com/templates/ga4tometa-params-mapper/"
+versions:
+  - sha: 94d76a052171784dca4d434528d63962b6b8f37c
+    changeNotes: Initial release.
