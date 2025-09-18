@@ -1,4 +1,4 @@
-﻿___TERMS_OF_SERVICE___
+___TERMS_OF_SERVICE___
 
 By creating or modifying this file you agree to Google Tag Manager's Community
 Template Gallery Developer Terms of Service available at
@@ -14,7 +14,11 @@ ___INFO___
   "version": 1,
   "securityGroups": [],
   "displayName": "GA4 to Meta Commerce Parameter Mapper",
-  "categories": ["UTILITY", "ADVERTISING","DATA_WAREHOUSING"],
+  "categories": [
+    "UTILITY",
+    "ADVERTISING",
+    "DATA_WAREHOUSING"
+  ],
   "description": "This GTM template helps you seamlessly map Google Analytics 4 (GA4) e-commerce parameters to the correct format for Meta (Facebook) Pixel.",
   "containerContexts": [
     "WEB"
@@ -32,6 +36,13 @@ ___TEMPLATE_PARAMETERS___
     "simpleValueType": true,
     "alwaysInSummary": true,
     "displayName": "When checked saves and retrieves the object in localStorage"
+  },
+  {
+    "type": "TEXT",
+    "name": "ga4ecommObj",
+    "displayName": "GA4 Ecommerce Object",
+    "simpleValueType": true,
+    "help": "If empty will read from the Data Layer"
   }
 ]
 
@@ -42,15 +53,13 @@ const dl = require('copyFromDataLayer');
 const JSON = require('JSON');
 const makeInteger = require('makeInteger');
 const makeNumber = require('makeNumber');
-const ecommerce = dl('ecommerce');
-const event = dl('event');
+const ecommerce = data.ga4ecommObj || dl('ecommerce');
 const items = ecommerce.items || [];
 const localStorage = require('localStorage');
 const isPersistent = data.persistent;
 if (!ecommerce) {
   return null;
 }
-const lsMetaObject = localStorage.getItem('metaObject');
 
 const MetaObject = {};
 const getItemIDs = (items) => {
@@ -76,7 +85,7 @@ MetaObject.currency = ecommerce.currency;
 MetaObject.value = makeNumber(ecommerce.value) || getValue(items);
 MetaObject.content_ids = getItemIDs(items);
 MetaObject.contents = getContentsArray(items);
-if (event === 'begin_checkout') MetaObject.num_items = ecommerce.items.length;
+MetaObject.num_items = ecommerce.items.length;
 if (items.length > 0) {
   MetaObject.content_type = items.length > 1 ? 'product_group' : 'product';
 }
