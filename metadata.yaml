@@ -7,6 +7,6 @@ versions:
       Optimized the data persistence feature for improved performance. 
       Includes general code refactoring for better stability and readability.
   - sha: 7197f5e6869aafaab7fa1a9abf4b1399c5648cc8
-    changeNotes: Added support for GA4 Ecommerce Variable, added support fot the key num_items.
+    changeNotes: Added support for GA4 Ecommerce Variable, added support for the key num_items.
   - sha: 94d76a052171784dca4d434528d63962b6b8f37c
     changeNotes: Initial release.
