@@ -1,6 +1,9 @@
 homepage: "https://www.paolobietolini.com"
 documentation: "https://paolobietolini.com/templates/ga4tometa-params-mapper/"
 versions:
+  - sha: 3d6c0bf7c1e3d8b3b65f69dad9aec001cc37e545
+    changeNotes: |-
+      Fixed a critical bug in the item validation logic that could cause the variable to fail. Optimized the data persistence feature for improved performance. Includes general code refactoring for better stability and readability.
   - sha: 7197f5e6869aafaab7fa1a9abf4b1399c5648cc8
     changeNotes: Added support for GA4 Ecommerce Variable, added support fot the key num_items.
   - sha: 94d76a052171784dca4d434528d63962b6b8f37c
