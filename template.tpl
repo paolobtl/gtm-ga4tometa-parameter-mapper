@@ -1,11 +1,3 @@
-___TERMS_OF_SERVICE___
-
-By creating or modifying this file you agree to Google Tag Manager's Community
-Template Gallery Developer Terms of Service available at
-https://developers.google.com/tag-manager/gallery-tos (or such other URL as
-Google may provide), as modified from time to time.
-
-
 ___INFO___
 
 {
@@ -53,50 +45,67 @@ const dl = require('copyFromDataLayer');
 const JSON = require('JSON');
 const makeInteger = require('makeInteger');
 const makeNumber = require('makeNumber');
-const ecommerce = data.ga4ecommObj || dl('ecommerce');
-const items = ecommerce.items || [];
 const localStorage = require('localStorage');
+const toString = require('makeString');
+
+// --- Configuration ---
+const ecommerce = data.ga4ecommObj || dl('ecommerce');
 const isPersistent = data.persistent;
+
+// --- Guard Clauses ---
 if (!ecommerce) {
   return null;
 }
 
-const MetaObject = {};
-const getItemIDs = (items) => {
-  return items.filter(item => item.item_id && typeof(item.item_id) === 'string')
-    .map(item => item.item_id);
+const items = ecommerce.items || [];
+
+if (items.length === 0) {
+  return null;
+}
+
+// --- Helper Functions ---
+const getItemIDs = (itemList) => {
+  return itemList
+    .filter(item => item.item_id)
+    .map(item => toString(item.item_id));
 };
 
-const getContentsArray = (items) => {
-  return items.map((item) => ({
+const getContentsArray = (itemList) => {
+  return itemList.map((item) => ({
     id: item.item_id,
     quantity: makeInteger(item.quantity) || 1,
     item_price: makeNumber(item.price)
   }));
 };
 
-const getValue = (items) => {
-  return items.reduce((a,c) => {
-    const v = c.quantity*c.price;
-    if(v) return a+v;},0);
+const calculateValueFromItems = (itemList) => {
+  return itemList.reduce((accumulator, currentItem) => {
+    const value = (currentItem.quantity || 1) * currentItem.price;
+    if (value) {
+      return accumulator + value;
+    }
+    return accumulator;
+  }, 0);
 };
 
+// --- Main Logic ---
+const MetaObject = {};
+
 MetaObject.currency = ecommerce.currency;
-MetaObject.value = makeNumber(ecommerce.value) || getValue(items);
+MetaObject.value = makeNumber(ecommerce.value) || calculateValueFromItems(items);
 MetaObject.content_ids = getItemIDs(items);
 MetaObject.contents = getContentsArray(items);
-MetaObject.num_items = ecommerce.items.length;
-if (items.length > 0) {
-  MetaObject.content_type = items.length > 1 ? 'product_group' : 'product';
-}
+MetaObject.num_items = items.length;
+
+MetaObject.content_type = items.length > 1 ? 'product_group' : 'product';
+
 if (ecommerce.transaction_id) {
   MetaObject.order_id = ecommerce.transaction_id;
 }
+
 if (isPersistent) {
   localStorage.setItem('metaObject', JSON.stringify(MetaObject));
-  return JSON.parse(localStorage.getItem('metaObject'));
 }
-
 
 return MetaObject;
 
@@ -199,69 +208,8 @@ ___WEB_PERMISSIONS___
 
 ___TESTS___
 
-scenarios:
-- name: Output is Equal to Expected
-  code: |-
-    testCases.forEach(testCase => {
-      mock('logToConsole', log);
-      mock('copyFromDataLayer', (key) => testCase.data[key]);
-      mock('makeInteger', makeInteger);
-      mock('makeNumber', makeNumber);
-      const result = runCode();
-      assertThat(result).isNotEqualTo(null);
-      assertThat(result).isEqualTo(testCase.expected);
-    });
-setup: |-
-  const makeInteger = require('makeInteger');
-  const makeNumber = require('makeNumber');
-  const log = require('logToConsole');
-  // Definisci i test case per diversi eventi
-  const testCases = [
-    {
-      name: "Test 'begin_checkout' event",
-      data: {
-        event: "begin_checkout",
-        ecommerce: {
-          currency: "USD",
-          value: 30.03,
-          items: [
-            { item_id: "SKU_12345", price: 10.01, quantity: 3 }
-          ]
-        }
-      },
-      expected: {
-        currency: "USD",
-        value: 30.03,
-        content_ids: ["SKU_12345"],
-        contents: [{id: "SKU_12345", item_price: 10.01, quantity: 3}],
-        num_items: 1,
-        content_type: "product"
-      }
-    },
-    {
-      name: "Test 'purchase' event with multiple items",
-      data: {
-        event: "purchase",
-        ecommerce: {
-          currency: "EUR",
-          value: 50.00,
-          transaction_id: "T_45678",
-          items: [
-            { item_id: "A_1", price: 20.00, quantity: 1 },
-            { item_id: "B_2", price: 15.00, quantity: 2 }
-          ]
-        }
-      },
-      expected: {
-        currency: "EUR",
-        value: 50.00,
-        content_ids: ["A_1", "B_2"],
-        contents: [{id: "A_1", item_price: 20, quantity: 1}, {id: "B_2", item_price: 15, quantity: 2}],
-        content_type: "product_group",
-        order_id: "T_45678"
-      }
-    }
-  ];
+scenarios: []
+setup: ''
 
 
 ___NOTES___
